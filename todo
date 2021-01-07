@@ -1,3 +1,4 @@
 Add Update to Rearrage the Songs [Feature]
 Optimize the flow of info on the network to minimise the server load [Need - Medium]
 Add Support to search for playlist and album [Need - High]
+Add SocketIO rooms support for multiple audio host and audio clients [Need - Medium]
