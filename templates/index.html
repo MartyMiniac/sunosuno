@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/p5.js"></script>-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
+      <title>Document</title>
+</head>
+<style>
+  ::-webkit-scrollbar {
+      width: 20px;
+    }
+
+    /* Track */
+    ::-webkit-scrollbar-track {
+      box-shadow: inset 0 0 5px grey;
+      background-color: #000000;
+      border-radius: 10px;
+    }
+    
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+      background:  rgb(37,37,37);
+      border-radius: 10px;
+      transition: 0.4s;  
+    }
+
+    /* Handle on hover */
+    ::-webkit-scrollbar-thumb:hover {
+      background: #727272; 
+    }
+    html{
+        padding: 0;
+        margin: 0;
+        border: none;
+        overflow-x: hidden;
+        overflow-y: hidden;
+    }
+    body{
+        background-color: black;
+        padding: 0;
+        margin: 0;
+        border: none;
+    }
+    .head{
+        background-image: linear-gradient(#830000, #460000);
+        position: relative;
+        padding: 0.5em;
+        border: none;
+        margin: 0;
+    }
+    .headtext{
+        background-image: linear-gradient(#575757, #303030);
+        color: white;
+        padding: 0.2em;
+        border: none;
+        border-radius: 5px;
+        margin: 0;
+        width: fit-content;
+        -webkit-text-stroke: 1px darkred;
+        font-family: 'calibri';
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .playerdiv{
+        padding-top: 10px;
+        margin: 0;
+        width: 100vw;
+        background-color: rgba(39, 39, 39, 0.4);
+        transition: 0.4s;        
+
+        background-image: url("");
+        background-repeat: repeat-x;
+        background-size: auto;
+        background-position: 0%;
+        background-size: contain;
+    }
+    .playerdiv:hover{
+      background-color: rgba(39, 39, 39, 0.9);
+    }
+    .buttons{      
+        padding: 1em;
+        padding-bottom: 0px;
+        margin: 0 auto;
+        width: fit-content;
+        border-radius: 25px;
+    }
+    .buttons img{
+        width: 3em;
+        height: 3em;
+        padding: 0;
+        margin: 1em;
+        cursor: pointer;
+    }
+    #pause{
+      display: none;
+    }
+    #songtitle{
+      background-color: rgb(39, 39, 39, 0.6);
+      color: white;
+      font-family: 'calibri';
+      font-weight: 800;
+      font-size: 1.5em;
+      width: fit-content;
+      margin: 0 auto;
+      margin-top: 10px;
+      padding: 5px;
+      border-radius: 25px;
+    }
+    #seektime{
+      color: white;
+      font-family: 'calibri';
+      font-size: 1em;
+      width: fit-content;
+      padding: 5px;
+      margin: 0px;
+      border: none;
+      background-color: black;
+    }
+    .slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 10px;
+      padding: 0px;
+      margin: 10px 0px;
+      background: #8a4848;
+      outline: none;
+    }
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 25px;
+      height: 25px;
+      border-radius: 50%; 
+      background: #830000;
+      box-shadow: 0px 0px 20px rgb(255, 133, 133);
+      cursor: pointer;
+    }
+
+    .flex-container {
+        position: absolute;
+        display: flex;
+        flex-wrap: wrap;
+        overflow-y: auto;
+        overflow-x: hidden;
+        width: 100vw;
+        height: auto;
+        top: 287px;
+        bottom: 0px;
+        background-color: black;
+        background-image: url("");
+        background-repeat: no-repeat;
+        background-size: auto;
+        background-position: center;
+        background-size: cover;
+    }
+    #flexentity{
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-y: auto;
+        overflow-x: hidden;
+        height: fit-content;
+
+        color: white;
+        background-color: rgba(37,37,37,0.7);
+        width: 100vw;
+        margin: 10px;
+        line-height: 30px;
+        padding-left: 20px;
+        font-size: 20px;
+        border-left: 0px solid red;
+        transition: 0.2s;
+    }
+    #playlistimg img{
+      width: 5em;
+      height: auto;
+      margin: 10px;
+    }
+    #playlistimg{
+      display: inline;
+    }
+    #playlistinfo{
+      margin: 10px;
+      display: inline;
+      font-family: "calibri";
+    }
+    #flexentityselected {
+        border-left: 10px solid red;
+    }
+</style>
+<body id="bodyID">
+    <div class="head">
+        <h1 class="headtext" id='headtextID'>SUNO N SUNO</h1>
+    </div>
+    <div class="playerdiv" id="playerdivID">
+        <p id="songtitle"></p>
+        <div class="buttons">
+          <img src="static\icons\skip_left.png" id="skip_left">
+          <img src="static\icons\play.png" id="play">
+          <img src="static\icons\pause.png" id="pause">
+          <img src="static\icons\skip_right.png" id="skip_right">
+        </div>
+        <p id="seektime">This is Time</p>
+        <input type="range" min="0" max="100" value="0" class="slider" id="myRange">
+        <audio id="audiop" src="" hidden></audio>
+    </div>
+    <div id="playlist" class="flex-container">
+      
+    </div>
+</body>
+<script>
+  var seekchanging=false;
+  var playlist=[];
+  var currentsongid=0;
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    //Playing audio and ui
+    document.getElementById("play").addEventListener('click', function(){
+        document.getElementById("audiop").play();
+    });
+    document.getElementById("audiop").addEventListener('play',function(){
+        document.getElementById("play").style.display='none';
+        document.getElementById("pause").style.display='inline';
+        broadcastsongname(currentsongid);
+    })
+
+    //Pausing audio and ui
+    document.getElementById("pause").addEventListener('click', function(){
+        document.getElementById("audiop").pause();
+    });
+    document.getElementById("audiop").addEventListener('pause',function(){
+        document.getElementById("pause").style.display='none';
+        document.getElementById("play").style.display='inline';
+        broadcastsongname(currentsongid);
+    })
+
+    //Skipping controls
+    document.getElementById("skip_right").addEventListener('click', function(){skipnext()});
+    document.getElementById("skip_left").addEventListener('click', function(){skiplast()});
+
+    //Audio Seek controls
+    document.getElementById("myRange").onmousedown=function(){
+      seekchanging=true;
+    };
+    document.getElementById("myRange").onmouseup=function(){
+      seekchanging=false;
+    };
+    document.getElementById("myRange").addEventListener('change', function(){
+      document.getElementById("audiop").currentTime=document.getElementById("myRange").value*document.getElementById("audiop").duration/100;
+    });
+
+    //Audio Seek ui update
+    setInterval(function(){
+      document.getElementById("seektime").innerHTML=Math.round(document.getElementById("audiop").currentTime)+"s / "+Math.round(document.getElementById("audiop").duration)+"s";
+      if(seekchanging==false)
+        document.getElementById("myRange").value=(document.getElementById("audiop").currentTime/document.getElementById("audiop").duration)*100;
+      
+      socket.emit('hostseeksync', {
+        data: (document.getElementById("audiop").currentTime/document.getElementById("audiop").duration)*100
+      });
+
+    }, 1000);
+    
+    function addplaylistui(data){
+      let str="";
+      str+="<div id=\"flexentity\">";
+      str+="<div id=\"playlistimg\">";
+      str+="<img src=\""+data.image+"\">";
+      str+="</div>";
+      str+="<div id=\"playlistinfo\">";
+      str+="Title: "+data.name;
+      str+="<br>Album : "+data.album;
+      str+="<br>Artist : "+data.artist;
+      str+="</div>"
+      str+="</div>";
+      document.getElementById("playlist").innerHTML=document.getElementById("playlist").innerHTML+str;
+    }
+
+    //Socketio controls
+    socket.on('url',function(data){
+        playlist.push(data);
+        addplaylistui(data);
+        if(playlist.length==1){
+          document.getElementById("audiop").src=data.url;
+          document.getElementById("songtitle").innerHTML=data.name;
+        }
+    });
+    socket.on('pause',function(){
+        document.getElementById("audiop").pause();
+    });
+    socket.on('play',function(){
+        document.getElementById("audiop").play();
+    });
+    socket.on('hostskipleft',function(){
+        skiplast();
+    });
+    socket.on('hostskipright',function(){
+        skipnext();
+    });
+    socket.on('hostseekmove', function(data){
+        console.log(data);
+        document.getElementById("audiop").currentTime=data.time*document.getElementById("audiop").duration/100;
+    })
+
+    //player logic
+    function playsongid(id){
+        data=playlist[id];      
+        document.getElementById("audiop").src=data.url;
+        document.getElementById("songtitle").innerHTML=data.name;
+        document.getElementById("audiop").play();
+    }
+    function skipnext(){
+      currentsongid=(currentsongid+1)%playlist.length;
+      playsongid(currentsongid);
+      broadcastsongname(currentsongid);
+    }
+    function skiplast(){
+      currentsongid=currentsongid-1;
+      if(currentsongid<0)
+        currentsongid=currentsongid+playlist.length;
+      playsongid(currentsongid);
+      broadcastsongname(currentsongid);
+    }
+    function broadcastsongname(id){
+      let sname=playlist[id].name;
+      socket.emit('hostnamebroadcast', {
+        data: sname
+      });
+    }
+</script>
+</html>

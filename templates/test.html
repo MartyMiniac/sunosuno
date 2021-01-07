@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
+    <title>Document</title>
+</head>
+<style>
+    ::placeholder{
+        color: white;
+    }
+    html{
+        padding: 0;
+        margin: 0;
+        border: none;
+        overflow-x: hidden;
+        overflow-y: hidden;
+    }
+    body{
+        background-color: black;
+        padding: 0;
+        margin: 0;
+        border: none;
+    }
+    .head{
+        background-image: linear-gradient(#830000, #460000);
+        position: relative;
+        padding: 0.5em;
+        border: none;
+        margin: 0;
+    }
+    .headtext{
+        background-image: linear-gradient(#575757, #303030);
+        color: white;
+        padding: 0.2em;
+        border: none;
+        border-radius: 5px;
+        margin: 0;
+        width: fit-content;
+        -webkit-text-stroke: 1px darkred;
+        font-family: 'calibri';
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .playerdiv{
+        margin: 0;
+        width: 100vw;
+        background-color: rgb(39, 39, 39);
+    }
+    .buttons{      
+        padding: 1em;
+        padding-bottom: 0px;
+        margin: 0 auto;
+        width: fit-content;
+    }
+    .buttons img{
+        width: 3em;
+        height: 3em;
+        padding: 0;
+        margin: 1em;
+        cursor: pointer;
+    }
+    #pause{
+      display: none;
+    }
+    #songtitle{
+      color: white;
+      font-family: 'calibri';
+      font-weight: 800;
+      font-size: 1.5em;
+      width: fit-content;
+      margin: 0 auto;
+      padding-top: 10px;
+    }
+    #seektime{
+      color: white;
+      font-family: 'calibri';
+      font-size: 1em;
+      width: fit-content;
+      padding: 5px;
+      margin: 0px;
+      border: none;
+      background-color: black;
+    }
+    #search{
+        background-color: #830000;
+        border-radius: 25px;
+        padding: 0.75em;
+        width: 50vw;
+        color: white;
+    }
+    #searchbtn{
+        background-color: #830000;
+        border-radius: 25px;
+        padding: 0.75em;
+        color: white;
+        margin: 0px 10px;
+        margin-bottom: 5px;
+        width: 100px;
+    }
+    .slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 10px;
+      padding: 0px;
+      margin: 10px 0px;
+      background: #8a4848;
+      outline: none;
+    }
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 25px;
+      height: 25px;
+      border-radius: 50%; 
+      background: #830000;
+      box-shadow: 0px 0px 20px rgb(255, 133, 133);
+      cursor: pointer;
+    }
+
+    .flex-container {
+        display: flex;
+        flex-wrap: wrap;
+        overflow-y: auto;
+        overflow-x: hidden;
+        width: 100vw;
+        height: 80vh;        
+        background-color: #000000;
+    }
+    .flex-container > div {
+        color: white;
+        background-color: #272727;
+        width: 100vw;
+        margin: 10px;
+        line-height: 30px;
+        padding: 20px;
+        font-size: 15px;
+        border-left: 0px solid red;
+        transition: 0.2s;
+        cursor: pointer;
+        font-family: "calibri";
+    }
+    .flex-container > div:hover {
+        border-left: 10px solid red;
+    }
+</style>
+<body>
+    <div class="head">
+        <h1 class="headtext" id='headtextID'>SUNO N SUNO</h1>
+    </div>
+    <div class="playerdiv">
+        <p id="songtitle">This is Title</p>
+        <div class="buttons">
+          <img src="static\icons\skip_left.png" id="skip_left">
+          <img src="static\icons\play.png" id="play">
+          <img src="static\icons\pause.png" id="pause">
+          <img src="static\icons\skip_right.png" id="skip_right">
+        </div>
+        <p id="seektime">This is Time</p>
+        <input type="range" min="0" max="100" value="0" class="slider" id="myRange">
+        <input type="text" id="search" placeholder="Search">
+        <button id="searchbtn">Search</button>
+        <div id="results" class="flex-container">
+        </div>
+    </div>
+</body>
+<script>
+    var songresults;
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
+    function test(url, name){
+            socket.emit('receiveurl',{
+            data: url,
+            title: name,
+        });
+    }
+    function pause(){
+        socket.emit('receivepause');
+    }
+    function play(){
+        socket.emit('receiveplay');
+    }
+    socket.on('clientseeksync', function(data){
+        document.getElementById("myRange").value=data.data;
+        document.getElementById("seektime").innerHTML=Math.round(data.data)+"%";
+    });
+    function seekmove(t){
+        socket.emit('clientseekmove',{
+            time: t,
+        });
+    }
+
+    document.getElementById("play").addEventListener('click', function(){
+        document.getElementById("play").style.display='none';
+        document.getElementById("pause").style.display='inline';
+        play();
+    });
+    document.getElementById("pause").addEventListener('click', function(){
+        document.getElementById("play").style.display='inline';
+        document.getElementById("pause").style.display='none';
+        pause();
+    });    
+    document.getElementById("skip_right").addEventListener('click', function(){
+        socket.emit('clientskipright')
+    });
+    document.getElementById("skip_left").addEventListener('click', function(){
+        socket.emit('clientskipleft')
+    });
+    document.getElementById("myRange").addEventListener('change', function(){
+        console.log("move");
+        seekmove(document.getElementById("myRange").value);
+    });
+    document.getElementById("searchbtn").addEventListener("click", function(){
+        socket.emit("songsearch",{
+            query: document.getElementById("search").value
+        });
+        console.log(document.getElementById("search").value);
+    });
+    socket.on('songsearchresults', function(data){
+        songresults=data;
+        console.log(data);
+        let str="";
+        for(let i=0; i<data.length; i++){
+            let element=data[i];
+                str+="<div id="+i+" onclick=sendurl()>";
+                str+="Title: "+element.name;
+                str+="<br>Album: "+element.album;
+                str+="<br>Artist: "+element.artist;
+                str+="</div>"
+
+        };
+        document.getElementById("results").innerHTML=str;
+    });
+    function sendurl(){
+        let tmp=songresults[event.target.id];
+        document.getElementById("songtitle").innerHTML=tmp.name;
+        console.log(tmp);
+        socket.emit("clientsonginfo",{
+            info:tmp
+        });
+    }
+    socket.on('clientnamebroadcast', function(data){
+        document.getElementById("songtitle").innerHTML=data.data;
+    });
+</script>
+</html>
