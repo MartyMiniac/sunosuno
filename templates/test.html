@@ -74,6 +74,7 @@
       padding-top: 10px;
     }
     #seektime{
+      float: right;
       color: white;
       font-family: 'calibri';
       font-size: 1em;
@@ -118,6 +119,25 @@
       box-shadow: 0px 0px 20px rgb(255, 133, 133);
       cursor: pointer;
     }
+    .volume{
+      float: left;
+      -webkit-appearance: none;
+      height: 5px;
+      padding: 0px;
+      margin: 10px 0px;
+      border-radius: 25px;
+      background: #8a4848;
+      outline: none;
+    }
+    .volume::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%; 
+      background: #830000;
+      cursor: pointer;
+    }
 
     .flex-container {
         display: flex;
@@ -158,6 +178,7 @@
           <img src="static\icons\skip_right.png" id="skip_right">
         </div>
         <p id="seektime">This is Time</p>
+        <input type="range" min="0" max="100" value="100" class="volume" id="volumeID">
         <input type="range" min="0" max="100" value="0" class="slider" id="myRange">
         <input type="text" id="search" placeholder="Search">
         <button id="searchbtn">Search</button>
@@ -233,7 +254,6 @@
     });
     function sendurl(){
         let tmp=songresults[event.target.id];
-        document.getElementById("songtitle").innerHTML=tmp.name;
         console.log(tmp);
         socket.emit("clientsonginfo",{
             info:tmp
@@ -241,6 +261,11 @@
     }
     socket.on('clientnamebroadcast', function(data){
         document.getElementById("songtitle").innerHTML=data.data;
+    });
+    document.getElementById("volumeID").addEventListener("change",function(){
+      socket.emit('clientvolume',{
+          data: Math.round(document.getElementById("volumeID").value)/100
+      });
     });
 </script>
 </html>

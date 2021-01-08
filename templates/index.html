@@ -109,6 +109,7 @@
       border-radius: 25px;
     }
     #seektime{
+      float: right;
       color: white;
       font-family: 'calibri';
       font-size: 1em;
@@ -124,6 +125,7 @@
       height: 10px;
       padding: 0px;
       margin: 10px 0px;
+      border-radius: 25px;
       background: #8a4848;
       outline: none;
     }
@@ -135,6 +137,25 @@
       border-radius: 50%; 
       background: #830000;
       box-shadow: 0px 0px 20px rgb(255, 133, 133);
+      cursor: pointer;
+    }
+    .volume{
+      float: left;
+      -webkit-appearance: none;
+      height: 5px;
+      padding: 0px;
+      margin: 10px 0px;
+      border-radius: 25px;
+      background: #8a4848;
+      outline: none;
+    }
+    .volume::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%; 
+      background: #830000;
       cursor: pointer;
     }
 
@@ -202,6 +223,7 @@
           <img src="static\icons\skip_right.png" id="skip_right">
         </div>
         <p id="seektime">This is Time</p>
+        <input type="range" min="0" max="100" value="100" class="volume" id="volumeID">
         <input type="range" min="0" max="100" value="0" class="slider" id="myRange">
         <audio id="audiop" src="" hidden></audio>
     </div>
@@ -213,6 +235,7 @@
   var seekchanging=false;
   var playlist=[];
   var currentsongid=0;
+  var volumeinterval;
     var socket = io.connect('http://' + document.domain + ':' + location.port);
 
     //Playing audio and ui
@@ -239,6 +262,15 @@
     document.getElementById("skip_right").addEventListener('click', function(){skipnext()});
     document.getElementById("skip_left").addEventListener('click', function(){skiplast()});
 
+    //Audio volume controls
+    document.getElementById("volumeID").onmousedown=function(){
+      volumeinterval=setInterval(function(){
+        document.getElementById("audiop").volume=Math.round(document.getElementById("volumeID").value)/100;
+      },10);
+    }
+    document.getElementById("volumeID").onmouseup=function(){
+      clearInterval(volumeinterval);
+    }
     //Audio Seek controls
     document.getElementById("myRange").onmousedown=function(){
       seekchanging=true;
@@ -256,6 +288,12 @@
       if(seekchanging==false)
         document.getElementById("myRange").value=(document.getElementById("audiop").currentTime/document.getElementById("audiop").duration)*100;
       
+      if(document.getElementById("audiop").currentTime==document.getElementById("audiop").duration){
+
+        if((currentsongid)<playlist.length-1)
+        skipnext();
+
+      }
       socket.emit('hostseeksync', {
         data: (document.getElementById("audiop").currentTime/document.getElementById("audiop").duration)*100
       });
@@ -302,6 +340,10 @@
         console.log(data);
         document.getElementById("audiop").currentTime=data.time*document.getElementById("audiop").duration/100;
     })
+    socket.on('hostvloume', function(data){
+      document.getElementById("audiop").volume=data.data;
+      document.getElementById("volumeID").value=100*data.data;
+    });
 
     //player logic
     function playsongid(id){

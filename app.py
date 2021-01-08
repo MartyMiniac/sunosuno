@@ -49,6 +49,10 @@ def seekmove():
 def seekmove():
     socketio.emit('hostskipleft')
 
+@socketio.on('clientvolume')
+def seekmove(data):
+    socketio.emit('hostvloume', data)
+
 @socketio.on('hostnamebroadcast')
 def seekmove(data):
     socketio.emit('clientnamebroadcast', data)
